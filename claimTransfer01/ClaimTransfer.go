@@ -62,8 +62,8 @@ type Claim struct {
 //	 Init - Initialize the process by creating one record in system validating owner and then storing the information
 //==============================================================================================================================
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-	var A, B, C, D, E, F, G string                                                       // Entities
-	var names = []string{"user_type1_0", "user_type2_0", "user_type3_0", "user_type4_0"} //username
+	var A, B, C, D, E, F, G string       // Entities
+	var names = []string{"user_type1_0"} //username
 
 	var err error
 	var callerName string
