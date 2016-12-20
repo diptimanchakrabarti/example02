@@ -75,6 +75,10 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 	//put username with ecert
 	for i := 0; i < len(names); i = i + 1 {
 		t.add_ecert(stub, names[i], args[7])
+		_, err = t.get_ecert(stub, names[i])
+		if err != nil {
+			return nil, errors.New("Error getting ecert record. It is not there")
+		}
 	}
 
 	//get caller name
@@ -238,6 +242,23 @@ func (t *SimpleChaincode) add_ecert(stub shim.ChaincodeStubInterface, name strin
 
 	return nil, nil
 
+}
+
+//==============================================================================================================================
+//	 General Functions
+//==============================================================================================================================
+//	 get_ecert - Takes the name passed and calls out to the REST API for HyperLedger to retrieve the ecert
+//				 for that user. Returns the ecert as retrived including html encoding.
+//==============================================================================================================================
+func (t *SimpleChaincode) get_ecert(stub shim.ChaincodeStubInterface, name string) ([]byte, error) {
+
+	ecert, err := stub.GetState(name)
+
+	if err != nil {
+		return nil, errors.New("Couldn't retrieve ecert for user " + name)
+	}
+
+	return ecert, nil
 }
 
 //=================================================================================================================================
