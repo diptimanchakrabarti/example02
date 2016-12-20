@@ -78,9 +78,9 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 	//	return nil, fmt.Errorf("Permission Denied. User is not authorized to create record%s==%s", callerName, Initiator)
 
 	//}
-	if err != nil {
-		return nil, fmt.Errorf("Not got the user details from back end")
-	}
+	//if err != nil {
+	//	return nil, fmt.Errorf("Not got the user details from back end")
+	//}
 	// Initialize the chaincode
 	A = args[0]
 	B = args[1]
@@ -91,7 +91,9 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 	G = args[6]
 
 	_, err = t.create_claim(stub, callerName, A, B, C, D, E, F, G)
-
+	if err != nil {
+		return nil, fmt.Errorf("Not able to create claim")
+	}
 	return nil, nil
 }
 
