@@ -82,7 +82,7 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 	}
 
 	//get caller name
-	callerName, err = t.get_caller_data(stub)
+	callerName, err = t.get_username(stub)
 	if callerName != "user_type1_0" { // Only the Provider can create a new claim
 
 		return nil, fmt.Errorf("Permission Denied. User is not authorized to create record%s==%s", callerName, Initiator)
