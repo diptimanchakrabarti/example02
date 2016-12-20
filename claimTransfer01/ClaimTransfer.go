@@ -62,22 +62,28 @@ type Claim struct {
 //	 Init - Initialize the process by creating one record in system validating owner and then storing the information
 //==============================================================================================================================
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-	var A, B, C, D, E, F, G string // Entities
+	var A, B, C, D, E, F, G string                                                       // Entities
+	var names = []string{"user_type1_0", "user_type2_0", "user_type3_0", "user_type4_0"} //username
 
 	var err error
 	var callerName string
 
-	if len(args) != 7 {
-		return nil, errors.New("Incorrect number of arguments. Expecting 7")
+	if len(args) != 8 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 8")
+	}
+
+	//put username with ecert
+	for i := 0; i < len(names); i = i + 1 {
+		t.add_ecert(stub, names[i], args[7])
 	}
 
 	//get caller name
 	callerName, err = t.get_caller_data(stub)
-	//if callerName != Initiator { // Only the Provider can create a new claim
+	if callerName != Initiator { // Only the Provider can create a new claim
 
-	//	return nil, fmt.Errorf("Permission Denied. User is not authorized to create record%s==%s", callerName, Initiator)
+		return nil, fmt.Errorf("Permission Denied. User is not authorized to create record%s==%s", callerName, Initiator)
 
-	//}
+	}
 	//if err != nil {
 	//	return nil, fmt.Errorf("Not got the user details from back end")
 	//}
@@ -216,6 +222,22 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	return nil, nil
+}
+
+//==============================================================================================================================
+//	 add_ecert - Adds a new ecert and user pair to the table of ecerts
+//==============================================================================================================================
+
+func (t *SimpleChaincode) add_ecert(stub shim.ChaincodeStubInterface, name string, ecert string) ([]byte, error) {
+
+	err := stub.PutState(name, []byte(ecert))
+
+	if err == nil {
+		return nil, errors.New("Error storing eCert for user " + name + " identity: " + ecert)
+	}
+
+	return nil, nil
+
 }
 
 //=================================================================================================================================
