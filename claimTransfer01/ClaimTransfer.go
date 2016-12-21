@@ -246,8 +246,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 //  		initial arguments passed are passed on to the called function.
 //=================================================================================================================================
 func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-	var c Claim
-	caller := args[0]
+	//var c Claim
+	//caller := args[0]
 	claimId := args[1]
 	if len(args) != 2 {
 		return nil, fmt.Errorf("Argument number is not correct")
@@ -257,12 +257,15 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 		if err != nil {
 			return nil, fmt.Errorf("not received state details")
 		}
-
-		err = json.Unmarshal(bytes, &c)
-		if err != nil {
-			return nil, fmt.Errorf("Nort able to unmarshall the status")
+		if err == nil {
+			return bytes, nil
 		}
-		return t.get_claim_details(stub, claimId, c, caller)
+
+		//	err = json.Unmarshal(bytes, &c)
+		//	if err != nil {
+		//		return nil, fmt.Errorf("Nort able to unmarshall the status")
+		//	}
+		//	return t.get_claim_details(stub, claimId, c, caller)
 	}
 	return nil, nil
 }
