@@ -170,8 +170,11 @@ func (t *SimpleChaincode) create_claim(stub shim.ChaincodeStubInterface, caller 
 		fmt.Printf("CREATE_CLAIM: Error saving changes: %s", err)
 		return nil, errors.New("Error saving changes")
 	}
-
-	return nil, nil
+	bytes, err := stub.GetState(c.ClaimID)
+	if err != nil {
+		return nil, errors.New("Error in retriving information")
+	}
+	return bytes, nil
 
 }
 
@@ -214,11 +217,11 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 	bytes, err := stub.GetState(claimId)
 
 	if err != nil {
-		return nil, fmt.Errorf("The claim id is not available in back end")
+		return nil, errors.New("The claim id is not available in back end")
 	}
 	err = json.Unmarshal(bytes, &c)
 	if err != nil {
-		return nil, fmt.Errorf("Unmarshalling failed for claim")
+		return nil, errors.New("Unmarshalling failed for claim")
 	}
 	if function == "transfer_to_host" {
 		return t.transfer_to_host(stub, claimId, c, args[0])
@@ -235,7 +238,7 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		//	} else if function="transfer_to_cfa"{
 		//    return        t.transfer_to_cfa(stub, claimId, c,args[0])
 	} else {
-		return nil, fmt.Errorf("Function name is wrong or no function")
+		return nil, errors.New("Function name is wrong or no function")
 	}
 	return nil, nil
 
@@ -250,12 +253,12 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 	//caller := args[0]
 	claimId := args[1]
 	if len(args) != 2 {
-		return nil, fmt.Errorf("Argument number is not correct")
+		return nil, errors.New("Argument number is not correct")
 	}
 	if function == "get_claim_details" {
 		bytes, err := stub.GetState(claimId)
 		if err != nil {
-			return nil, fmt.Errorf("not received state details")
+			return nil, errors.New("not received state details")
 		}
 		if err == nil {
 			return bytes, nil
@@ -311,14 +314,14 @@ func (t *SimpleChaincode) get_ecert(stub shim.ChaincodeStubInterface, name strin
 func (t *SimpleChaincode) transfer_to_host(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string) ([]byte, error) {
 
 	if caller != Host {
-		return nil, fmt.Errorf("The intended user is not Host")
+		return nil, errors.New("The intended user is not Host")
 	}
 	c.Owner = caller
 
 	_, err := t.save_changes(stub, c) // Write new state
 
 	if err != nil {
-		return nil, fmt.Errorf("Not able to save state")
+		return nil, errors.New("Not able to save state")
 	}
 
 	return nil, nil // We are Done
@@ -335,7 +338,7 @@ func (t *SimpleChaincode) update_by_host(stub shim.ChaincodeStubInterface, claim
 	user := caller
 	fmt.Printf("The Owner is: %s", user)
 	if user != Host {
-		return nil, fmt.Errorf("Owner is not matching")
+		return nil, errors.New("Owner is not matching")
 	}
 	c.ApprovedAmount = approvedAmt
 	c.LocalPlanCode = localPlan
@@ -343,7 +346,7 @@ func (t *SimpleChaincode) update_by_host(stub shim.ChaincodeStubInterface, claim
 	_, err := t.save_changes(stub, c) // Write new state
 
 	if err != nil {
-		return nil, fmt.Errorf("Not able to save state")
+		return nil, errors.New("Not able to save state")
 	}
 
 	return nil, nil // We are Done
@@ -360,13 +363,13 @@ func (t *SimpleChaincode) get_claim_details(stub shim.ChaincodeStubInterface, cl
 	user := caller
 	fmt.Printf("The Owner is: %s", user)
 	if c.Owner != user {
-		return nil, fmt.Errorf("Not Authorized User")
+		return nil, errors.New("Not Authorized User")
 	}
 
 	bytes, err := json.Marshal(c)
 
 	if err != nil {
-		return nil, fmt.Errorf("Not able to save state")
+		return nil, errors.New("Not able to save state")
 	}
 
 	return bytes, nil // We are Done
