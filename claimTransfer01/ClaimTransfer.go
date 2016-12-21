@@ -252,7 +252,7 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 	if len(args) != 2 {
 		return nil, fmt.Errorf("Argument number is not correct")
 	}
-	if function == "get_data" {
+	if function == "get_claim_details" {
 		bytes, err := stub.GetState(claimId)
 		if err != nil {
 			return nil, fmt.Errorf("not received state details")
