@@ -249,8 +249,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 //  		initial arguments passed are passed on to the called function.
 //=================================================================================================================================
 func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-	//var c Claim
-	//caller := args[0]
+	var c Claim
+	caller := args[0]
 	claimId := args[1]
 	if len(args) != 2 {
 		return nil, errors.New("Argument number is not correct")
@@ -260,50 +260,17 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 		if err != nil {
 			return nil, errors.New("not received state details")
 		}
-		if err == nil {
-			return bytes, nil
+		//if err == nil {
+		//	return bytes, nil
+		//}
+
+		err = json.Unmarshal(bytes, &c)
+		if err != nil {
+			return nil, fmt.Errorf("Nort able to unmarshall the status")
 		}
-
-		//	err = json.Unmarshal(bytes, &c)
-		//	if err != nil {
-		//		return nil, fmt.Errorf("Nort able to unmarshall the status")
-		//	}
-		//	return t.get_claim_details(stub, claimId, c, caller)
+		return t.get_claim_details(stub, claimId, c, caller)
 	}
 	return nil, nil
-}
-
-//==============================================================================================================================
-//	 add_ecert - Adds a new ecert and user pair to the table of ecerts
-//==============================================================================================================================
-
-func (t *SimpleChaincode) add_ecert(stub shim.ChaincodeStubInterface, name string, ecert string) ([]byte, error) {
-
-	err := stub.PutState(name, []byte(ecert))
-
-	if err == nil {
-		return nil, errors.New("Error storing eCert for user " + name + " identity: " + ecert)
-	}
-
-	return nil, nil
-
-}
-
-//==============================================================================================================================
-//	 General Functions
-//==============================================================================================================================
-//	 get_ecert - Takes the name passed and calls out to the REST API for HyperLedger to retrieve the ecert
-//				 for that user. Returns the ecert as retrived including html encoding.
-//==============================================================================================================================
-func (t *SimpleChaincode) get_ecert(stub shim.ChaincodeStubInterface, name string) ([]byte, error) {
-
-	ecert, err := stub.GetState(name)
-
-	if err != nil {
-		return nil, errors.New("Couldn't retrieve ecert for user " + name)
-	}
-
-	return ecert, nil
 }
 
 //=================================================================================================================================
