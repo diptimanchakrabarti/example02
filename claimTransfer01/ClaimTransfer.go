@@ -268,7 +268,12 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 		if err != nil {
 			return nil, fmt.Errorf("Nort able to unmarshall the status")
 		}
-		return t.get_claim_details(stub, claimId, c, caller)
+		byteReturn, err := t.get_claim_details(stub, claimId, c, caller)
+		if err != nil {
+			return nil, fmt.Errorf("Error with getClaimDetails")
+		}
+		return byteReturn, nil
+
 	}
 	return nil, nil
 }
