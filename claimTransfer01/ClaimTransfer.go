@@ -250,6 +250,7 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 //=================================================================================================================================
 func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var c Claim
+	var byteReturn []byte
 	caller := args[0]
 	claimId := args[1]
 	if len(args) != 2 {
@@ -268,14 +269,14 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 		if err != nil {
 			return nil, fmt.Errorf("Nort able to unmarshall the status")
 		}
-		byteReturn, err := t.get_claim_details(stub, claimId, c, caller)
+		byteReturn, err = t.get_claim_details(stub, claimId, c, caller)
 		if err != nil {
 			return nil, fmt.Errorf("Error with getClaimDetails")
 		}
 		return byteReturn, nil
 
 	}
-	return nil, nil
+	return byteReturn, nil
 }
 
 //=================================================================================================================================
