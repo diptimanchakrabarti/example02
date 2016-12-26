@@ -56,6 +56,8 @@ type Claim struct {
 	CostShare      string `json:"costShare"`
 	AdjustmentFlag string `json:"adjustmentFlag"`
 	Owner          string `json:"owner"`
+	FinalAmount    string `json:"finalApprovedAmount"`
+	PaymentMethod  string `json:"paymentMethod"`
 }
 
 //==============================================================================================================================
@@ -147,9 +149,10 @@ func (t *SimpleChaincode) create_claim(stub shim.ChaincodeStubInterface, caller 
 	RemotePlanCode := "\"remotePlanCode\":\"UNDEFINED\", "
 	CostShare := "\"costShare\":\"UNDEFINED\", "
 	AdjustmentFlag := "\"adjustmentFlag\":\"UNDEFINED\", "
-	Owner := "\"owner\":\"" + caller + "\" "
-
-	claim_json := "{" + claimID + ServiceDate + ProviderID + MemberID + SubscriberID + ProcedureCode + ChargedAmount + ApprovedAmount + LocalPlanCode + RemotePlanCode + CostShare + AdjustmentFlag + Owner + "}" // Concatenates the variables to create the total JSON object
+	Owner := "\"owner\":\"" + caller + "\" ,"
+	FinalAmount := "\"finalApprovedAmount\":\"UNDEFINED\", "
+	PaymentMethod := "\"paymentMethod\":\"UNDEFINED\" "
+	claim_json := "{" + claimID + ServiceDate + ProviderID + MemberID + SubscriberID + ProcedureCode + ChargedAmount + ApprovedAmount + LocalPlanCode + RemotePlanCode + CostShare + AdjustmentFlag + Owner + FinalAmount + PaymentMethod + "}" // Concatenates the variables to create the total JSON object
 
 	err = json.Unmarshal([]byte(claim_json), &c) // Convert the JSON defined above into a Claim object for go
 
@@ -227,18 +230,16 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		return t.transfer_to_host(stub, claimId, c, args[0])
 	} else if function == "update_by_host" {
 		return t.update_by_host(stub, claimId, c, args[0], args[2], args[3], args[4])
-		//} else if function =="transfer_to_home"{
-		//	return	t.transfer_to_home(stub, claimId,c, args[0])
-		//	} else if function="update_by_home"{
-		//	return	t.update_by_home(stub, claimId,c, args[0], args[2], args[3])
-		//	} else if function = "transfer_to_hostByHome" {
-		//	   return t.transfer_to_hostByHome(stub, claimId,c, args[0])
-		//	} else if function="update_by_hostForCFA"{
-		//	return	t.update_by_hostForCFA(stub, claimId, c, args[0], args[2], args[3])
-		//	} else if function="transfer_to_cfa"{
-		//    return        t.transfer_to_cfa(stub, claimId, c,args[0])
-	} else {
-		return nil, errors.New("Function name is wrong or no function")
+	} else if function == "transfer_to_home" {
+		return t.transfer_to_home(stub, claimId, c, args[0])
+	} else if function == "update_by_home" {
+		return t.update_by_home(stub, claimId, c, args[0], args[2], args[3])
+	} else if function == "transfer_to_hostByHome" {
+		return t.transfer_to_hostByHome(stub, claimId, c, args[0])
+	} else if function == "update_by_hostForCFA" {
+		return t.update_by_hostForCFA(stub, claimId, c, args[0], args[2], args[3])
+	} else if function == "transfer_to_cfa" {
+		return t.transfer_to_cfa(stub, claimId, c, args[0])
 	}
 	return nil, nil
 
@@ -306,6 +307,72 @@ func (t *SimpleChaincode) transfer_to_host(stub shim.ChaincodeStubInterface, cla
 }
 
 //=================================================================================================================================
+//	 Transfer Functions
+//=================================================================================================================================
+//	 transfer_to_home
+//=================================================================================================================================
+func (t *SimpleChaincode) transfer_to_home(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string) ([]byte, error) {
+
+	if caller != Home {
+		return nil, errors.New("The intended user is not Home")
+	}
+	c.Owner = caller
+
+	_, err := t.save_changes(stub, c) // Write new state
+
+	if err != nil {
+		return nil, errors.New("Not able to save state")
+	}
+
+	return nil, nil // We are Done
+
+}
+
+//=================================================================================================================================
+//	 Transfer Functions
+//=================================================================================================================================
+//	 transfer_to_hostbyHome
+//=================================================================================================================================
+func (t *SimpleChaincode) transfer_to_hostByHome(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string) ([]byte, error) {
+
+	if caller != Host {
+		return nil, errors.New("The intended user is not Home")
+	}
+	c.Owner = caller
+
+	_, err := t.save_changes(stub, c) // Write new state
+
+	if err != nil {
+		return nil, errors.New("Not able to save state")
+	}
+
+	return nil, nil // We are Done
+
+}
+
+//=================================================================================================================================
+//	 Transfer Functions
+//=================================================================================================================================
+//	 transfer_to_cfa
+//=================================================================================================================================
+func (t *SimpleChaincode) transfer_to_cfa(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string) ([]byte, error) {
+
+	if caller != CFA {
+		return nil, errors.New("The intended user is not Home")
+	}
+	c.Owner = caller
+
+	_, err := t.save_changes(stub, c) // Write new state
+
+	if err != nil {
+		return nil, errors.New("Not able to save state")
+	}
+
+	return nil, nil // We are Done
+
+}
+
+//=================================================================================================================================
 //	 Update Functions
 //=================================================================================================================================
 //	 update_by_host
@@ -320,6 +387,56 @@ func (t *SimpleChaincode) update_by_host(stub shim.ChaincodeStubInterface, claim
 	c.ApprovedAmount = approvedAmt
 	c.LocalPlanCode = localPlan
 	c.RemotePlanCode = remotePlan
+	_, err := t.save_changes(stub, c) // Write new state
+
+	if err != nil {
+		return nil, errors.New("Not able to save state")
+	}
+
+	return nil, nil // We are Done
+
+}
+
+//=================================================================================================================================
+//	 Update Functions
+//=================================================================================================================================
+//	 update_by_home
+//=================================================================================================================================
+func (t *SimpleChaincode) update_by_home(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string, costShare string, adjustmentFlag string) ([]byte, error) {
+
+	user := caller
+	fmt.Printf("The Owner is: %s", user)
+	if user != Host {
+		return nil, errors.New("Owner is not matching")
+	}
+	c.CostShare = costShare
+	c.AdjustmentFlag = adjustmentFlag
+
+	_, err := t.save_changes(stub, c) // Write new state
+
+	if err != nil {
+		return nil, errors.New("Not able to save state")
+	}
+
+	return nil, nil // We are Done
+
+}
+
+//=================================================================================================================================
+//	 Update Functions
+//=================================================================================================================================
+//	 update_by_hostForCFA
+//=================================================================================================================================
+func (t *SimpleChaincode) update_by_hostForCFA(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string, finalAmount string, paymentMethod string) ([]byte, error) {
+
+	user := caller
+	fmt.Printf("The Owner is: %s", user)
+	if user != Host {
+		return nil, errors.New("Owner is not matching")
+	}
+	c.FinalAmount = finalAmount
+	c.PaymentMethod = paymentMethod
+
 	_, err := t.save_changes(stub, c) // Write new state
 
 	if err != nil {
