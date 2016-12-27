@@ -283,7 +283,7 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 		//if err == nil {
 		//	return bytes, nil
 		//}
-
+		fmt.Printf("Starting function get_claim_details")
 		byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
 		if err != nil {
 			return nil, fmt.Errorf("Error with getClaimDetails")
@@ -294,6 +294,7 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 		return byteReturn, nil
 
 	} else if function == "allow_to_update" {
+		fmt.Printf("Starting function allow_to_update")
 		currentState := string(stateBytes)
 		if caller == Initiator && currentState == STATE_INITIATE {
 			byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
