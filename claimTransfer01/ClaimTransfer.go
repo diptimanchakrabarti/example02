@@ -330,7 +330,7 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 			return byteReturn, nil
 		}*/
 	}
-	return nil, nil
+	return stateBytes, nil
 }
 
 //=================================================================================================================================
