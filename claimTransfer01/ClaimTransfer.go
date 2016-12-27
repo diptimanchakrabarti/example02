@@ -17,7 +17,7 @@ var logger = shim.NewLogger("CLDChaincode")
 //CURRENT WORKAROUND USES ROLES CHANGE WHEN OWN USERS CAN BE CREATED SO THAT IT READ 1, 2, 3, 4, 5
 const Initiator = "user_type1_0"
 const Host = "user_type2_0"
-const Home = "user_type3_0"
+const Home = "user_type8_0"
 const CFA = "user_type4_0"
 
 //==============================================================================================================================
@@ -258,20 +258,20 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 	if len(args) != 2 {
 		return nil, errors.New("Argument number is not correct")
 	}
+	bytes, err := stub.GetState(claimID)
+	if err != nil {
+		return nil, errors.New("not received state details")
+	}
 
+	err = json.Unmarshal(bytes, &c)
+	if err != nil {
+		return nil, fmt.Errorf("Nort able to unmarshall the status")
+	}
 	if function == "get_claim_details" {
-		bytes, err := stub.GetState(claimID)
-		if err != nil {
-			return nil, errors.New("not received state details")
-		}
+
 		//if err == nil {
 		//	return bytes, nil
 		//}
-
-		err = json.Unmarshal(bytes, &c)
-		if err != nil {
-			return nil, fmt.Errorf("Nort able to unmarshall the status")
-		}
 
 		byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
 		if err != nil {
@@ -282,6 +282,19 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 		fmt.Printf("The value is: %s", outPut)
 		return byteReturn, nil
 
+	} else if function == "allow_to_update" {
+		if len(c.Owner) == 0 {
+			return nil, fmt.Errorf("Error with Owner Name")
+		}
+		ownerStored := c.Owner
+		if ownerStored != caller {
+			return nil, fmt.Errorf("Caller is not authorized to update")
+		}
+		byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
+		if err != nil {
+			return nil, fmt.Errorf("Error with getClaimDetails")
+		}
+		return byteReturn, nil
 	}
 	return byteReturn, nil
 }
