@@ -383,9 +383,7 @@ func (t *SimpleChaincode) update_by_host(stub shim.ChaincodeStubInterface, claim
 
 	user := caller
 	fmt.Printf("The Owner is: %s", user)
-	if user != storedUser {
-		return nil, errors.New("Owner is not the same who wants to update")
-	}
+
 	if user != Host {
 		return nil, errors.New("Owner is not matching")
 	}
