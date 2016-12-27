@@ -226,20 +226,21 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 	if err != nil {
 		return nil, errors.New("Unmarshalling failed for claim")
 	}
+	storedUser := c.Owner
 	if function == "transfer_to_host" {
-		return t.transfer_to_host(stub, claimId, c, args[0])
+		return t.transfer_to_host(stub, claimId, c, args[0], storedUser)
 	} else if function == "update_by_host" {
-		return t.update_by_host(stub, claimId, c, args[0], args[2], args[3], args[4])
+		return t.update_by_host(stub, claimId, c, args[0], args[2], args[3], args[4], storedUser)
 	} else if function == "transfer_to_home" {
-		return t.transfer_to_home(stub, claimId, c, args[0])
+		return t.transfer_to_home(stub, claimId, c, args[0], storedUser)
 	} else if function == "update_by_home" {
-		return t.update_by_home(stub, claimId, c, args[0], args[2], args[3])
+		return t.update_by_home(stub, claimId, c, args[0], args[2], args[3], storedUser)
 	} else if function == "transfer_to_hostByHome" {
-		return t.transfer_to_hostByHome(stub, claimId, c, args[0])
+		return t.transfer_to_hostByHome(stub, claimId, c, args[0], storedUser)
 	} else if function == "update_by_hostForCFA" {
-		return t.update_by_hostForCFA(stub, claimId, c, args[0], args[2], args[3])
+		return t.update_by_hostForCFA(stub, claimId, c, args[0], args[2], args[3], storedUser)
 	} else if function == "transfer_to_cfa" {
-		return t.transfer_to_cfa(stub, claimId, c, args[0])
+		return t.transfer_to_cfa(stub, claimId, c, args[0], storedUser)
 	}
 	return nil, nil
 
@@ -271,6 +272,7 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 		if err != nil {
 			return nil, fmt.Errorf("Nort able to unmarshall the status")
 		}
+
 		byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
 		if err != nil {
 			return nil, fmt.Errorf("Error with getClaimDetails")
@@ -289,7 +291,7 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 //=================================================================================================================================
 //	 transfer_to_host
 //=================================================================================================================================
-func (t *SimpleChaincode) transfer_to_host(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string) ([]byte, error) {
+func (t *SimpleChaincode) transfer_to_host(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string, storedUser string) ([]byte, error) {
 
 	if caller != Host {
 		return nil, errors.New("The intended user is not Host")
@@ -311,7 +313,7 @@ func (t *SimpleChaincode) transfer_to_host(stub shim.ChaincodeStubInterface, cla
 //=================================================================================================================================
 //	 transfer_to_home
 //=================================================================================================================================
-func (t *SimpleChaincode) transfer_to_home(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string) ([]byte, error) {
+func (t *SimpleChaincode) transfer_to_home(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string, storedUser string) ([]byte, error) {
 
 	if caller != Home {
 		return nil, errors.New("The intended user is not Home")
@@ -333,7 +335,7 @@ func (t *SimpleChaincode) transfer_to_home(stub shim.ChaincodeStubInterface, cla
 //=================================================================================================================================
 //	 transfer_to_hostbyHome
 //=================================================================================================================================
-func (t *SimpleChaincode) transfer_to_hostByHome(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string) ([]byte, error) {
+func (t *SimpleChaincode) transfer_to_hostByHome(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string, storedUser string) ([]byte, error) {
 
 	if caller != Host {
 		return nil, errors.New("The intended user is not Home")
@@ -355,7 +357,7 @@ func (t *SimpleChaincode) transfer_to_hostByHome(stub shim.ChaincodeStubInterfac
 //=================================================================================================================================
 //	 transfer_to_cfa
 //=================================================================================================================================
-func (t *SimpleChaincode) transfer_to_cfa(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string) ([]byte, error) {
+func (t *SimpleChaincode) transfer_to_cfa(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string, storedUser string) ([]byte, error) {
 
 	if caller != CFA {
 		return nil, errors.New("The intended user is not Home")
@@ -377,7 +379,7 @@ func (t *SimpleChaincode) transfer_to_cfa(stub shim.ChaincodeStubInterface, clai
 //=================================================================================================================================
 //	 update_by_host
 //=================================================================================================================================
-func (t *SimpleChaincode) update_by_host(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string, approvedAmt string, localPlan string, remotePlan string) ([]byte, error) {
+func (t *SimpleChaincode) update_by_host(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string, approvedAmt string, localPlan string, remotePlan string, storedUser string) ([]byte, error) {
 
 	user := caller
 	fmt.Printf("The Owner is: %s", user)
@@ -402,7 +404,7 @@ func (t *SimpleChaincode) update_by_host(stub shim.ChaincodeStubInterface, claim
 //=================================================================================================================================
 //	 update_by_home
 //=================================================================================================================================
-func (t *SimpleChaincode) update_by_home(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string, costShare string, adjustmentFlag string) ([]byte, error) {
+func (t *SimpleChaincode) update_by_home(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string, costShare string, adjustmentFlag string, storedUser string) ([]byte, error) {
 
 	user := caller
 	fmt.Printf("The Owner is: %s", user)
@@ -427,7 +429,7 @@ func (t *SimpleChaincode) update_by_home(stub shim.ChaincodeStubInterface, claim
 //=================================================================================================================================
 //	 update_by_hostForCFA
 //=================================================================================================================================
-func (t *SimpleChaincode) update_by_hostForCFA(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string, finalAmount string, paymentMethod string) ([]byte, error) {
+func (t *SimpleChaincode) update_by_hostForCFA(stub shim.ChaincodeStubInterface, claimId string, c Claim, caller string, finalAmount string, paymentMethod string, storedUser string) ([]byte, error) {
 
 	user := caller
 	fmt.Printf("The Owner is: %s", user)
@@ -456,9 +458,6 @@ func (t *SimpleChaincode) get_claim_details(stub shim.ChaincodeStubInterface, cl
 
 	user := caller
 	fmt.Printf("The Owner is: %s", user)
-	if c.Owner != user {
-		return nil, errors.New("Not Authorized User")
-	}
 
 	bytes, err := json.Marshal(c)
 
