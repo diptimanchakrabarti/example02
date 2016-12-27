@@ -302,11 +302,12 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 			}
 			return byteReturn, nil
 		} else if caller == Host && currentState == STATE_HOST {
-			byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
-			if err != nil {
-				return nil, fmt.Errorf("Error with getClaimDetails")
-			}
-			return byteReturn, nil
+			//byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
+			//if err != nil {
+			//	return nil, fmt.Errorf("Error with getClaimDetails")
+			//	}
+			//	return byteReturn, nil
+			return stateBytes, nil
 		} else if caller == Host && currentState == STATE_HOME_HOST {
 			byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
 			if err != nil {
