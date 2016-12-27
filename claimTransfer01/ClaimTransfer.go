@@ -278,7 +278,7 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 	if errs != nil {
 		return nil, fmt.Errorf("Error with State")
 	}
-	if function == "get_claim_details" {
+	/*if function == "get_claim_details" {
 
 		//if err == nil {
 		//	return bytes, nil
@@ -293,23 +293,24 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 		fmt.Printf("The value is: %s", outPut)
 		return byteReturn, nil
 
-	} else if function == "allow_to_update" {
+	} else*/
+	if function == "allow_to_update" {
 		fmt.Printf("Starting function allow_to_update")
 		currentState := string(stateBytes)
-		if caller == Initiator && currentState == STATE_INITIATE {
+		/*if caller == Initiator && currentState == STATE_INITIATE {
 			byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
 			if err != nil {
 				return nil, fmt.Errorf("Error with getClaimDetails")
 			}
 			return byteReturn, nil
-		} else if caller == Host && currentState == STATE_HOST {
+		} else*/if caller == Host && currentState == STATE_HOST {
 			//byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
 			//if err != nil {
 			//	return nil, fmt.Errorf("Error with getClaimDetails")
 			//	}
 			//	return byteReturn, nil
 			return stateBytes, nil
-		} else if caller == Host && currentState == STATE_HOME_HOST {
+		} /*else if caller == Host && currentState == STATE_HOME_HOST {
 			byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
 			if err != nil {
 				return nil, fmt.Errorf("Error with getClaimDetails")
@@ -327,7 +328,7 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 				return nil, fmt.Errorf("Error with getClaimDetails")
 			}
 			return byteReturn, nil
-		}
+		}*/
 	}
 	return nil, nil
 }
