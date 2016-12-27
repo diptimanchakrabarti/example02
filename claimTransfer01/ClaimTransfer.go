@@ -252,7 +252,7 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 //=================================================================================================================================
 func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var c Claim
-	var byteReturn []byte
+	//var byteReturn []byte
 	caller := args[0]
 	claimID := args[1]
 	if len(args) != 2 {
@@ -296,7 +296,7 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 		}
 		return byteReturn, nil
 	}
-	return byteReturn, nil
+	return nil, nil
 }
 
 //=================================================================================================================================
