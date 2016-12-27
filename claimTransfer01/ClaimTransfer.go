@@ -319,6 +319,12 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 				return nil, fmt.Errorf("Error with getClaimDetails")
 			}
 			return byteReturn, nil
+		} else if caller == CFA && currentState == STATE_CFA {
+			byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
+			if err != nil {
+				return nil, fmt.Errorf("Error with getClaimDetails")
+			}
+			return byteReturn, nil
 		}
 	}
 	return nil, nil
