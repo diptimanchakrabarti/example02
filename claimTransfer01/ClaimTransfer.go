@@ -24,10 +24,11 @@ const CFA = "user_type4_0"
 //	 Status types - Claim Approval lifecycle is broken down into 5 statuses, this is part of the business logic to determine what can
 //					be done to the vehicle at points in it's lifecycle
 //==============================================================================================================================
-const STATE_INITIATE = 0
-const STATE_HOST = 1
-const STATE_HOME = 2
-const STATE_CFA = 3
+const STATE_INITIATE = "0"
+const STATE_HOST = "1"
+const STATE_HOME = "2"
+const STATE_HOME_HOST = "3"
+const STATE_CFA = "4"
 
 //==============================================================================================================================
 //	 Structure Definitions
@@ -177,6 +178,10 @@ func (t *SimpleChaincode) create_claim(stub shim.ChaincodeStubInterface, caller 
 	if err != nil {
 		return nil, errors.New("Error in retriving information")
 	}
+	err = stub.PutState("State", []byte(STATE_INITIATE))
+	if err != nil {
+		return nil, errors.New("Error in putting information")
+	}
 	return bytes, nil
 
 }
@@ -264,8 +269,14 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 	}
 
 	err = json.Unmarshal(bytes, &c)
+
 	if err != nil {
 		return nil, fmt.Errorf("Nort able to unmarshall the status")
+	}
+
+	stateBytes, errs := stub.GetState("State")
+	if errs != nil {
+		return nil, fmt.Errorf("Error with State")
 	}
 	if function == "get_claim_details" {
 
@@ -283,18 +294,32 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 		return byteReturn, nil
 
 	} else if function == "allow_to_update" {
-		if len(c.Owner) == 0 {
-			return nil, fmt.Errorf("Error with Owner Name")
+		currentState := string(stateBytes)
+		if caller == Initiator && currentState == STATE_INITIATE {
+			byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
+			if err != nil {
+				return nil, fmt.Errorf("Error with getClaimDetails")
+			}
+			return byteReturn, nil
+		} else if caller == Host && currentState == STATE_HOST {
+			byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
+			if err != nil {
+				return nil, fmt.Errorf("Error with getClaimDetails")
+			}
+			return byteReturn, nil
+		} else if caller == Host && currentState == STATE_HOME_HOST {
+			byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
+			if err != nil {
+				return nil, fmt.Errorf("Error with getClaimDetails")
+			}
+			return byteReturn, nil
+		} else if caller == Home && currentState == STATE_HOME {
+			byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
+			if err != nil {
+				return nil, fmt.Errorf("Error with getClaimDetails")
+			}
+			return byteReturn, nil
 		}
-		ownerStored := c.Owner
-		if ownerStored != caller {
-			return nil, fmt.Errorf("Caller is not authorized to update")
-		}
-		byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
-		if err != nil {
-			return nil, fmt.Errorf("Error with getClaimDetails")
-		}
-		return byteReturn, nil
 	}
 	return nil, nil
 }
@@ -316,7 +341,10 @@ func (t *SimpleChaincode) transfer_to_host(stub shim.ChaincodeStubInterface, cla
 	if err != nil {
 		return nil, errors.New("Not able to save state")
 	}
-
+	errs := stub.PutState("State", []byte(STATE_HOST))
+	if errs != nil {
+		return nil, errors.New("Not able to save state")
+	}
 	return nil, nil // We are Done
 
 }
@@ -338,7 +366,10 @@ func (t *SimpleChaincode) transfer_to_home(stub shim.ChaincodeStubInterface, cla
 	if err != nil {
 		return nil, errors.New("Not able to save state")
 	}
-
+	errs := stub.PutState("State", []byte(STATE_HOME))
+	if errs != nil {
+		return nil, errors.New("Not able to save state")
+	}
 	return nil, nil // We are Done
 
 }
@@ -360,7 +391,10 @@ func (t *SimpleChaincode) transfer_to_hostByHome(stub shim.ChaincodeStubInterfac
 	if err != nil {
 		return nil, errors.New("Not able to save state")
 	}
-
+	errs := stub.PutState("State", []byte(STATE_HOME_HOST))
+	if errs != nil {
+		return nil, errors.New("Not able to save state")
+	}
 	return nil, nil // We are Done
 
 }
@@ -382,7 +416,10 @@ func (t *SimpleChaincode) transfer_to_cfa(stub shim.ChaincodeStubInterface, clai
 	if err != nil {
 		return nil, errors.New("Not able to save state")
 	}
-
+	errs := stub.PutState("State", []byte(STATE_CFA))
+	if errs != nil {
+		return nil, errors.New("Not able to save state")
+	}
 	return nil, nil // We are Done
 
 }
