@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
@@ -182,7 +183,9 @@ func (t *SimpleChaincode) create_claim(stub shim.ChaincodeStubInterface, caller 
 	if err != nil {
 		return nil, errors.New("Error in putting information")
 	}
-	err = stub.PutState("ClaimID", []byte(arg0))
+	claims := []string{arg0}
+	stringVal := "\x00" + strings.Join(claims, "\x00")
+	err = stub.PutState("ClaimID", []byte(stringVal))
 	if err != nil {
 		return nil, errors.New("Error in putting claim information in ledger")
 	}
