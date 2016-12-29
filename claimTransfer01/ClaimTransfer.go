@@ -182,6 +182,10 @@ func (t *SimpleChaincode) create_claim(stub shim.ChaincodeStubInterface, caller 
 	if err != nil {
 		return nil, errors.New("Error in putting information")
 	}
+	err = stub.PutState("ClaimID", []byte(arg0))
+	if err != nil {
+		return nil, errors.New("Error in putting claim information in ledger")
+	}
 	return bytes, nil
 
 }
@@ -258,32 +262,39 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var c Claim
 	//var byteReturn []byte
-	caller := args[0]
-	claimID := args[1]
-	if len(args) != 2 {
-		return nil, errors.New("Argument number is not correct")
-	}
-	bytes, err := stub.GetState(claimID)
-	if err != nil {
-		return nil, errors.New("not received state details")
-	}
-
-	err = json.Unmarshal(bytes, &c)
-
-	if err != nil {
-		return nil, fmt.Errorf("Nort able to unmarshall the status")
-	}
 
 	stateBytes, errs := stub.GetState("State")
 	if errs != nil {
 		return nil, fmt.Errorf("Error with State")
 	}
-	if function == "get_claim_details" {
+	if function == "get_claim_id" {
+		claimInfo, errors := stub.GetState("ClaimID")
+		if errors != nil {
+			return nil, fmt.Errorf("Error with Claim")
+		}
+		return claimInfo, nil
+	} else if function == "get_claim_details" {
 
 		//if err == nil {
 		//	return bytes, nil
 		//}
 		fmt.Printf("Starting function get_claim_details")
+
+		if len(args) != 2 {
+			return nil, errors.New("Argument number is not correct")
+		}
+		caller := args[0]
+		claimID := args[1]
+		bytes, err := stub.GetState(claimID)
+		if err != nil {
+			return nil, errors.New("not received state details")
+		}
+
+		err = json.Unmarshal(bytes, &c)
+
+		if err != nil {
+			return nil, fmt.Errorf("Nort able to unmarshall the status")
+		}
 		byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
 		if err != nil {
 			return nil, fmt.Errorf("Error with getClaimDetails")
@@ -295,6 +306,22 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 
 	} else if function == "allow_to_update" {
 		fmt.Printf("Starting function allow_to_update")
+
+		if len(args) != 2 {
+			return nil, errors.New("Argument number is not correct")
+		}
+		caller := args[0]
+		claimID := args[1]
+		bytes, err := stub.GetState(claimID)
+		if err != nil {
+			return nil, errors.New("not received state details")
+		}
+
+		err = json.Unmarshal(bytes, &c)
+
+		if err != nil {
+			return nil, fmt.Errorf("Nort able to unmarshall the status")
+		}
 		currentState := string(stateBytes)
 		if caller == Initiator && currentState == STATE_INITIATE {
 			byteReturn, err := t.get_claim_details(stub, claimID, c, caller)
