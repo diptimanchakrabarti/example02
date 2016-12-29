@@ -184,7 +184,7 @@ func (t *SimpleChaincode) create_claim(stub shim.ChaincodeStubInterface, caller 
 		return nil, errors.New("Error in putting information")
 	}
 	claims := []string{arg0}
-	stringVal := "\x00" + strings.Join(claims, "\x00")
+	stringVal := strings.Join(claims, "\x00")
 	err = stub.PutState("ClaimID", []byte(stringVal))
 	if err != nil {
 		return nil, errors.New("Error in putting claim information in ledger")
