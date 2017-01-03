@@ -46,11 +46,23 @@ type SimpleChaincode struct {
 type Claim struct {
 	ClaimID        string `json:"claimId"`
 	ServiceDate    string `json:"serviceDate"`
+	AdmissionDate  string `json:"admissionDate"`
 	ProviderID     string `json:"providerId"`
 	MemberID       string `json:"memberId"`
 	SubscriberID   string `json:"subscriberId"`
+	DiagCode       string `json:"diagCode"`
 	ProcedureCode  string `json:"procedureCode"`
+	ProcedureDate  string `json:"procedureDate"`
+	BillCode       string `json:"billCode"`
+	SrvcUnitNbr    string `json:"SrvcUnitNbr"`
+	RevenueCode    string `json:"revenueCode"`
+	RevenueDesc    string `json:"revenueDesc"`
+	AdmsnHourCode  string `json:"admsnHourCode"`
+	AdmsnTypeCode  string `json:"admsnTypeCode"`
+	AdmsnSrvcCode  string `json:"admsnSrvcCode"`
+	UnitOfService  string `json:"unitOfService"`
 	ChargedAmount  string `json:"chargedAmount"`
+	NonCovAmount   string `json:"nonCovAmount"`
 	ApprovedAmount string `json:"approvedAmount"`
 	LocalPlanCode  string `json:"localPlanCode"`
 	RemotePlanCode string `json:"remotePlanCode"`
@@ -71,8 +83,8 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 	var err error
 	var callerName string
 
-	if len(args) != 7 {
-		return nil, errors.New("Incorrect number of arguments. Expecting 7")
+	if len(args) != 19 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 19")
 	}
 
 	//get caller name
@@ -93,8 +105,20 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 	E = args[4]
 	F = args[5]
 	G = args[6]
+	H := args[7]
+	I := args[8]
+	J := args[9]
+	K := args[10]
+	L := args[11]
+	M := args[12]
+	N := args[13]
+	O := args[14]
+	P := args[15]
+	Q := args[16]
+	R := args[17]
+	S := args[18]
 
-	_, err = t.create_claim(stub, callerName, A, B, C, D, E, F, G)
+	_, err = t.create_claim(stub, callerName, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)
 	if err != nil {
 		return nil, fmt.Errorf("Not able to create claim")
 	}
@@ -135,16 +159,28 @@ func (t *SimpleChaincode) get_username(stub shim.ChaincodeStubInterface) (string
 //=================================================================================================================================
 //	 Create Vehicle - Creates the initial JSON for the vehcile and then saves it to the ledger.
 //=================================================================================================================================
-func (t *SimpleChaincode) create_claim(stub shim.ChaincodeStubInterface, caller string, arg0 string, arg1 string, arg2 string, arg3 string, arg4 string, arg5 string, arg6 string) ([]byte, error) {
+func (t *SimpleChaincode) create_claim(stub shim.ChaincodeStubInterface, caller string, arg0 string, arg1 string, arg2 string, arg3 string, arg4 string, arg5 string, arg6 string, arg7 string, arg8 string, arg9 string, arg10 string, arg11 string, arg12 string, arg13 string, arg14 string, arg15 string, arg16 string, arg17 string, arg18 string) ([]byte, error) {
 	var c Claim
 	var err error
 	claimID := "\"claimId\":\"" + arg0 + "\", "
 	ServiceDate := "\"serviceDate\":\"" + arg1 + "\", "
-	ProviderID := "\"providerId\":\"" + arg2 + "\", "
-	MemberID := "\"memberId\":\"" + arg3 + "\", "
-	SubscriberID := "\"subscriberId\":\"" + arg4 + "\", "
-	ProcedureCode := "\"procedureCode\":\"" + arg5 + "\", "
-	ChargedAmount := "\"chargedAmount\":\"" + arg6 + "\", "
+	AdmissionDate := "\"admissionDate\":\"" + arg2 + "\", "
+	ProviderID := "\"providerId\":\"" + arg3 + "\", "
+	MemberID := "\"memberId\":\"" + arg4 + "\", "
+	SubscriberID := "\"subscriberId\":\"" + arg5 + "\", "
+	DiagCode := "\"diagCode\":\"" + arg6 + "\", "
+	ProcedureCode := "\"procedureCode\":\"" + arg7 + "\", "
+	ProcedureDate := "\"procedureDate\":\"" + arg8 + "\", "
+	BillCode := "\"billCode\":\"" + arg9 + "\", "
+	SrvcUnitNbr := "\"SrvcUnitNbr\":\"" + arg10 + "\", "
+	RevenueCode := "\"revenueCode\":\"" + arg11 + "\", "
+	RevenueDesc := "\"revenueDesc\":\"" + arg12 + "\", "
+	AdmsnHourCode := "\"admsnHourCode\":\"" + arg13 + "\", "
+	AdmsnTypeCode := "\"admsnTypeCode\":\"" + arg14 + "\", "
+	AdmsnSrvcCode := "\"admsnSrvcCode\":\"" + arg15 + "\", "
+	UnitOfService := "\"unitOfService\":\"" + arg16 + "\", "
+	ChargedAmount := "\"chargedAmount\":\"" + arg17 + "\", "
+	NonCovAmount := "\"nonCovAmount\":\"" + arg18 + "\", "
 	ApprovedAmount := "\"approvedAmount\":\"UNDEFINED\", "
 	LocalPlanCode := "\"localPlanCode\":\"UNDEFINED\", "
 	RemotePlanCode := "\"remotePlanCode\":\"UNDEFINED\", "
@@ -153,7 +189,7 @@ func (t *SimpleChaincode) create_claim(stub shim.ChaincodeStubInterface, caller 
 	Owner := "\"owner\":\"" + caller + "\" ,"
 	FinalAmount := "\"finalApprovedAmount\":\"UNDEFINED\", "
 	PaymentMethod := "\"paymentMethod\":\"UNDEFINED\" "
-	claim_json := "{" + claimID + ServiceDate + ProviderID + MemberID + SubscriberID + ProcedureCode + ChargedAmount + ApprovedAmount + LocalPlanCode + RemotePlanCode + CostShare + AdjustmentFlag + Owner + FinalAmount + PaymentMethod + "}" // Concatenates the variables to create the total JSON object
+	claim_json := "{" + claimID + ServiceDate + AdmissionDate + ProviderID + MemberID + SubscriberID + DiagCode + ProcedureCode + ProcedureDate + BillCode + SrvcUnitNbr + RevenueCode + RevenueDesc + AdmsnHourCode + AdmsnTypeCode + AdmsnSrvcCode + UnitOfService + ChargedAmount + NonCovAmount + ApprovedAmount + LocalPlanCode + RemotePlanCode + CostShare + AdjustmentFlag + Owner + FinalAmount + PaymentMethod + "}" // Concatenates the variables to create the total JSON object
 
 	err = json.Unmarshal([]byte(claim_json), &c) // Convert the JSON defined above into a Claim object for go
 
