@@ -71,6 +71,7 @@ type Claim struct {
 	Owner          string `json:"owner"`
 	FinalAmount    string `json:"finalApprovedAmount"`
 	PaymentMethod  string `json:"paymentMethod"`
+	ClaimStatus    string `json:"claimStatus"`
 }
 
 //==============================================================================================================================
@@ -188,8 +189,9 @@ func (t *SimpleChaincode) create_claim(stub shim.ChaincodeStubInterface, caller 
 	AdjustmentFlag := "\"adjustmentFlag\":\"UNDEFINED\", "
 	Owner := "\"owner\":\"" + arg19 + "\" ,"
 	FinalAmount := "\"finalApprovedAmount\":\"UNDEFINED\", "
-	PaymentMethod := "\"paymentMethod\":\"UNDEFINED\" "
-	claim_json := "{" + claimID + ServiceDate + AdmissionDate + ProviderID + MemberID + SubscriberID + DiagCode + ProcedureCode + ProcedureDate + BillCode + SrvcUnitNbr + RevenueCode + RevenueDesc + AdmsnHourCode + AdmsnTypeCode + AdmsnSrvcCode + UnitOfService + ChargedAmount + NonCovAmount + ApprovedAmount + LocalPlanCode + RemotePlanCode + CostShare + AdjustmentFlag + Owner + FinalAmount + PaymentMethod + "}" // Concatenates the variables to create the total JSON object
+	PaymentMethod := "\"paymentMethod\":\"UNDEFINED\", "
+	ClaimStatus := "\"claimStatus\":\"INITIATED\" "
+	claim_json := "{" + claimID + ServiceDate + AdmissionDate + ProviderID + MemberID + SubscriberID + DiagCode + ProcedureCode + ProcedureDate + BillCode + SrvcUnitNbr + RevenueCode + RevenueDesc + AdmsnHourCode + AdmsnTypeCode + AdmsnSrvcCode + UnitOfService + ChargedAmount + NonCovAmount + ApprovedAmount + LocalPlanCode + RemotePlanCode + CostShare + AdjustmentFlag + Owner + FinalAmount + PaymentMethod + ClaimStatus + "}" // Concatenates the variables to create the total JSON object
 
 	err = json.Unmarshal([]byte(claim_json), &c) // Convert the JSON defined above into a Claim object for go
 
@@ -513,6 +515,7 @@ func (t *SimpleChaincode) update_by_host(stub shim.ChaincodeStubInterface, claim
 	c.ApprovedAmount = approvedAmt
 	c.LocalPlanCode = localPlan
 	c.RemotePlanCode = remotePlan
+	c.ClaimStatus = "HOSTAPPROVED"
 	_, err := t.save_changes(stub, c) // Write new state
 
 	if err != nil {
@@ -537,7 +540,7 @@ func (t *SimpleChaincode) update_by_home(stub shim.ChaincodeStubInterface, claim
 	}
 	c.CostShare = costShare
 	c.AdjustmentFlag = adjustmentFlag
-
+	c.ClaimStatus = "ADJUDICATED"
 	_, err := t.save_changes(stub, c) // Write new state
 
 	if err != nil {
@@ -562,7 +565,7 @@ func (t *SimpleChaincode) update_by_hostForCFA(stub shim.ChaincodeStubInterface,
 	}
 	c.FinalAmount = finalAmount
 	c.PaymentMethod = paymentMethod
-
+	c.ClaimStatus = "PAYMENTCOMPLETE"
 	_, err := t.save_changes(stub, c) // Write new state
 
 	if err != nil {
