@@ -181,7 +181,7 @@ func (t *SimpleChaincode) create_consensus(stub shim.ChaincodeStubInterface, cal
 	UnpaidAmt := "\"unpaidAmt\":\"UNDEFINED\", "
 	CnsnsNote := "\"cnsnsNote\":\"UNDEFINED\", "
 	CnsnsStatus := "\"cnsnsStatus\":\"CONSENSUSINITIATED\" "
-	consensus_json := "{" + claimID + ServiceDate + AdmissionDate + ProviderID + MemberID + SubscriberID + DiagCode + ProcedureCode + ProcedureDate + BillCode + SrvcUnitNbr + RevenueCode + RevenueDesc + AdmsnHourCode + AdmsnTypeCode + AdmsnSrvcCode + UnitOfService + ChargedAmount + NonCovAmount + Owner + ApprovedAmt + UnpaidAmt + CnsnsNote + CnsnsStatus + CnsnsStatus + "}" // Concatenates the variables to create the total JSON object
+	consensus_json := "{" + claimID + ServiceDate + AdmissionDate + ProviderID + MemberID + SubscriberID + DiagCode + ProcedureCode + ProcedureDate + BillCode + SrvcUnitNbr + RevenueCode + RevenueDesc + AdmsnHourCode + AdmsnTypeCode + AdmsnSrvcCode + UnitOfService + ChargedAmount + NonCovAmount + Owner + ApprovedAmt + UnpaidAmt + CnsnsNote + CnsnsStatus + "}" // Concatenates the variables to create the total JSON object
 
 	err = json.Unmarshal([]byte(consensus_json), &c) // Convert the JSON defined above into a Claim object for go
 
