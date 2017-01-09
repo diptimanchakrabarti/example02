@@ -290,6 +290,9 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		return t.update_by_hostForCFA(stub, claimId, c, args[0], args[2], args[3], storedUser)
 	} else if function == "transfer_to_cfa" {
 		return t.transfer_to_cfa(stub, claimId, c, args[0], storedUser)
+	} else if function == "Init" {
+
+		return t.Init(stub, function, args)
 	}
 	return nil, nil
 
